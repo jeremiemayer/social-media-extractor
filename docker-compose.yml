@@ -1,0 +1,29 @@
+version: "3"
+
+services:
+  twitter-listener:
+    build: .
+    image: social-media-extractor:latest
+    container_name: twitter_listener
+    command: [ "python", "./hashtag_listener.py"]
+    restart: always
+    network_mode: bridge
+    env_file:
+      - social-media-extractor.env
+    volumes:
+      - "db-data:/usr/src/app/persistent_data"
+
+  sm-nightly-upload:
+    image: social-media-extractor:latest
+    container_name: nightly_upload
+    depends_on:
+      - twitter-listener
+    command: ["python", "./main.py"]
+    network_mode: bridge
+    env_file:
+      - social-media-extractor.env
+    volumes:
+      - "db-data:/usr/src/app/persistent_data" 
+
+volumes:
+  db-data:
